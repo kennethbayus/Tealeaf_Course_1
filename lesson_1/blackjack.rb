@@ -10,7 +10,7 @@
 # If the player stays, then the dealer draws until he has 17 or more, or busts 
 
 def build_deck
-	cards=[2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
+  cards=[2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
 	suits =["Hearts", "Diamonds", "Spades", "Clubs"]
 
 	deck=cards.product(suits).map{ |c,s|
@@ -166,7 +166,7 @@ while play
 	player_final = final_total(player_cards)
 	dealer_final = final_total(dealer_cards)
 	if  player_final > dealer_final
-		puts "You have #{player_final} and the dealer has #{dealer_final}"
+	  puts "You have #{player_final} and the dealer has #{dealer_final}"
 		puts "You Win :) !!"
 	elsif dealer_final > player_final
 		puts "You have #{player_final} and the dealer has #{dealer_final}"
