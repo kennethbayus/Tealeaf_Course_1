@@ -19,7 +19,6 @@ end
 #create an array of cards
 #parameter for number of decks 
 class Deck
-  NUMBER_OF_DECKS = 1
   CARD_VALUES=[2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
   SUITS =["Hearts", "Diamonds", "Spades", "Clubs"]
 
@@ -27,9 +26,7 @@ class Deck
 
   def initialize
     @cards = []
-    NUMBER_OF_DECKS.times do 
-      SUITS.product(CARD_VALUES).each{|s,v| @cards << Card.new(s,v)}
-    end
+    SUITS.product(CARD_VALUES).each{|s,v| @cards << Card.new(s,v)}
   end
 
   def shuffle!
@@ -137,11 +134,13 @@ class Dealer
   def show_first_card
     puts "#{name} is showing:"
     puts "=> #{cards[0]}"
-    totals = calc_totals
-    if cards[0].value == 'A'
+    card=cards[0]
+    if card.value == 'A'
       puts "Current Hand Value is 1 or 11 \n\n"
+    elsif card.value.is_a? Integer
+      puts "Current Hand Value is: #{card.value} \n\n"
     else
-      puts "Current Hand Value is: #{totals.min} \n\n"
+      puts "Current Hand Value is: 10 \n\n"
     end
   end
 
@@ -152,17 +151,9 @@ class Game
   attr_accessor :player, :deck, :dealer
 
   def initialize
-    welcome_message
-    @player = Player.new(get_player_name)
+    @player = Player.new("Player")
     @dealer = Dealer.new
     @deck = Deck.new
-    deck.shuffle!
-    player.get_card(deck.deal_card)
-    dealer.get_card(deck.deal_card)
-    player.get_card(deck.deal_card)
-    player.show_hand
-    dealer.show_first_card
-    dealer.get_card(deck.deal_card)
   end
 
   def welcome_message
@@ -171,7 +162,7 @@ class Game
     puts "Welcome to Blackjack"
     puts "Good Luck!"
     puts "---------------------------"
-    puts "Press any key to continue"
+    puts "Press the return key to continue"
     gets.chomp
   end
 
@@ -183,28 +174,50 @@ class Game
     name
   end
   
+  def initial_deal
+    deck.shuffle!
+    player.get_card(deck.deal_card)
+    dealer.get_card(deck.deal_card)
+    player.get_card(deck.deal_card)
+    dealer.get_card(deck.deal_card)
+  end
+
+  def initial_show
+    player.show_hand
+    dealer.show_first_card
+  end
+
   def get_player_input
-    input=""
-    until input =="hit" || input =="stay"
+    input = ""
+    until input == "hit" || input == "stay"
       puts "Do you want to hit or stay? Please type hit or stay"
       input=gets.chomp.downcase
     end 
     input
   end
 
-  def player_hit
+  def reveal_card
+    card = deck.deal_card
+    puts "The revealed card is #{card} \n\n"
+    sleep(2)
+    card
+  end
+
+  def player_action
     action = get_player_input
     if action == "hit"
-      player.get_card(deck.deal_card)
+      card = reveal_card
+      player.get_card(card)
     end
     player.show_hand
     action
   end
 
-  def dealer_hit
+  def dealer_action
     dealer.show_hand
     puts "The Dealer draws another card...\n\n"
-    dealer.get_card(deck.deal_card)
+    card = reveal_card
+    dealer.get_card(card)
     sleep(2)
   end
 
@@ -228,7 +241,8 @@ class Game
     player.show_final_hand
     puts "-------Dealer Final Cards-------"
     dealer.show_final_hand
-    sleep(3)
+    puts "................."
+    sleep(2)
   end
 
   def winning_message
@@ -252,19 +266,24 @@ class Game
   end
 
   def play
+    welcome_message
+    player.name = get_player_name
+
+    initial_deal
+    initial_show
+  
     action=""
 
     while !player.busted? && !player.calc_totals.include?(21) && action != "stay"
-      action = player_hit
+      action = player_action
     end
     
     while !dealer.busted? && !player.busted? && dealer.final_total < 17 && !dealer.calc_totals.include?(21)
-      dealer_hit
+      dealer_action
     end
 
     dramatic_pause
     determine_outcome
-
   end
 end
 
