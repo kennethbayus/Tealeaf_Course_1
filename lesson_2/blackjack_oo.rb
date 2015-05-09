@@ -2,9 +2,9 @@
 
 class Card
   attr_reader :suit, :value
-  def initialize(s,v)
-    @suit = s
-    @value = v
+  def initialize(suit,value)
+    @suit = suit
+    @value = value
   end
 
   def pretty_output
@@ -16,8 +16,7 @@ class Card
   end
 end
 
-#create an array of cards
-#parameter for number of decks 
+
 class Deck
   CARD_VALUES=[2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
   SUITS =["Hearts", "Diamonds", "Spades", "Clubs"]
@@ -26,7 +25,7 @@ class Deck
 
   def initialize
     @cards = []
-    SUITS.product(CARD_VALUES).each{|s,v| @cards << Card.new(s,v)}
+    SUITS.product(CARD_VALUES).each{|suit,value| @cards << Card.new(suit,value)}
   end
 
   def shuffle!
@@ -45,7 +44,7 @@ module Hand
     cards.each do |card|
       puts "=> #{card}"
     end
-    totals = calc_totals
+    totals = calculate_totals
     if totals.length == 1 || totals.max > 21
       puts "Current Hand Value is: #{totals.min} \n\n"
     elsif totals.max == 21
@@ -55,7 +54,7 @@ module Hand
     end
   end
 
-  def calc_totals
+  def calculate_totals
     total=0
     aces=0
     totals=[]
@@ -73,9 +72,7 @@ module Hand
     # potential values for combinations of aces 
     # 1: 1 or 11, 2: 2 or 12, 3: 3 or 13, 4: 4 or 14
     if aces>0
-      #minimum value added
       totals<<total+aces
-      #maximum value added
       totals<<total+10+aces
     else
       totals<<total
@@ -88,11 +85,11 @@ module Hand
   end
 
   def busted?
-    calc_totals.min > 21
+    calculate_totals.min > 21
   end
 
   def final_total
-    totals=calc_totals
+    totals=calculate_totals
     if totals.max > 21
       totals.min
     else
@@ -115,8 +112,8 @@ class Player
 
   attr_accessor :name, :cards
 
-  def initialize(n)
-    @name = n
+  def initialize(name)
+    @name = name
     @cards = []
   end
 end
@@ -148,6 +145,8 @@ end
 
 #all the logic for the game 
 class Game
+  BLACKJACK = 21
+  DEALER_STAY = 17
   attr_accessor :player, :deck, :dealer
 
   def initialize
@@ -274,13 +273,13 @@ class Game
   
     action=""
 
-    while !player.busted? && !player.calc_totals.include?(21) && action != "stay"
+    until player.busted? || player.calculate_totals.include?(BLACKJACK) || action == "stay"
       action = player_action
-    end
+    end 
     
-    while !dealer.busted? && !player.busted? && dealer.final_total < 17 && !dealer.calc_totals.include?(21)
+    until dealer.busted? || player.busted? || dealer.final_total >= DEALER_STAY || dealer.calculate_totals.include?(BLACKJACK)
       dealer_action
-    end
+    end 
 
     dramatic_pause
     determine_outcome
